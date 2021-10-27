@@ -1,11 +1,10 @@
-const express = require("express"); //Line 1
-const app = express(); //Line 2
-const port = process.env.PORT || 5000; //Line 3
-const http = require("http").Server(express);
-const socketio = require("socket.io")(http);
+const express = require("express");
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
-// This displays message that the server running and listening to specified port
-app.listen(port, () => console.log(`Listening on port ${port}`)); //Line 6
 const cars = [
   {
     createdAt: "2021-10-08T02:12:55.608Z",
@@ -57,17 +56,22 @@ const cars = [
   },
 ];
 
-// socketio.on("connection", (socket) => {
-//   for (let i = 0; i < cars.length; i++) {
-//     socket.emit("car", cars[i]);
-//   }
-//   socket.on("car", (data) => {
-//     cars.push(data);
-//     socketio.emit("car", data);
-//   });
-// });
-// create a GET route
-app.get("/express_backend", (req, res) => {
-  //Line 9
-  res.send({ cars }); //Line 10
-}); //Line 11
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+
+io.on("connection", (socket) => {
+  setInterval(() => {
+    console.log("Hey");
+  }, 1000);
+  console.log("connected");
+
+  io.emit("getCars", cars);
+  // socket.on("chat message", (msg) => {
+  //   io.emit("chat message", msg + "jamie");
+  // });
+});
+
+server.listen(3000, () => {
+  console.log("listening on *:3000");
+});
